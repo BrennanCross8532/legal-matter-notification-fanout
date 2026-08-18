@@ -1,6 +1,6 @@
 # Send a signed matter update to every subscriber
 
-This example walks through a legal-tech intake flow, from a matter record to two concrete actions: delivering a signed document to each subscriber, then scheduling a weekday follow-up when the deadline is seven days out. The code uses Infrai's queue and cron calls through one `INFRAI_API_KEY`, so a single key covers every capability used here. The application keeps its content workflow in Python, while delivery work stays outside the request path.
+This example follows a legal-tech intake from a matter record to two concrete actions: deliver a signed document to each subscriber, then arrange a weekday follow-up when the deadline is seven days away. The code uses Infrai's queue and cron calls through one `INFRAI_API_KEY`, so one key covers every capability used here while the application keeps its content workflow in Python and delivery work waits outside the request path.
 
 ## The workflow in code
 
