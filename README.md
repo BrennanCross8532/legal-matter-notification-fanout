@@ -1,19 +1,19 @@
 # Send a signed matter update to every subscriber
 
-This example follows a legal-tech intake from a matter record to two concrete actions: deliver a signed document to each subscriber, then arrange a weekday follow-up when the deadline is seven days away. The code uses Infrai's queue and cron calls through one `INFRAI_API_KEY`, so one key covers every capability used here while the application keeps its content workflow in Python and delivery work waits outside the request path.
+This example models a legal-tech intake that begins with a matter record and resolves into two concrete operations: delivering a signed document to each subscriber, and scheduling a weekday follow-up when the deadline sits seven days out. The implementation routes Infrai's queue and cron calls through one `INFRAI_API_KEY`, so one key covers every capability exercised here while the application retains its content workflow in Python and the delivery work is deferred outside the request path.
 
 ## The workflow in code
 
-`legal_notifications.py` treats the matter as the source of truth. Each subscriber gets a distinct `delivery_id`, which makes a retry address the same delivery. The payload carries the matter id, subscriber id, event name, and signed document reference. A deadline inside the seven-day window also creates a weekday cron task.
+`legal_notifications.py` treats the matter as the source of truth. Each subscriber receives a distinct `delivery_id`, which ensures that a retry targets the identical delivery rather than emitting a duplicate. The payload carries the matter id, subscriber id, event name, and a signed document reference. A deadline that falls inside the seven-day window also produces a weekday cron task.
 
-The call sites are deliberately visible:
+The call sites are kept deliberately visible:
 
 ```python
 infrai.queue.publish(payload=delivery)
 infrai.cron.create(cron_expr="0 9 * * 1-5", task=task_url)
 ```
 
-The small client sends explicit HTTP methods, reads the `{ok, data, error, metadata}` envelope, and retries a rate-limited response with `Retry-After` or exponential delay. Write retries carry an `Idempotency-Key` header derived from the delivery or task identity.
+The small client issues explicit HTTP methods, reads the `{ok, data, error, metadata}` envelope, and retries a rate-limited response using `Retry-After` or an exponential delay. Write retries include an `Idempotency-Key` header derived from the delivery or task identity, which is the mechanism that preserves exactly-once semantics under redelivery.
 
 ## Run it locally
 
@@ -35,7 +35,7 @@ python3 -m unittest test_legal_notifications.py
 
 ## One practical detail
 
-The signed document value is intentionally a domain reference rather than a transport implementation. Your matter intake can replace `signed-engagement-letter` with the identifier used by your document system; the fan-out decision and queue boundary stay the same.
+The signed document value is intentionally a domain reference rather than a transport implementation. Your matter intake may replace `signed-engagement-letter` with the identifier employed by your document system; the fan-out decision and the queue boundary remain unchanged, and the audit trail continues to key off the original matter id.
 
 ## License
 
